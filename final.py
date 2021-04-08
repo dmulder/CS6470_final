@@ -10,6 +10,9 @@ from tensorflow.keras.models import Sequential
 import argparse
 
 class PlasticRecyclableClassifier(object):
+    recycle = ['milk_carton', 'plastic_bottle', 'pill_bottle']
+    non_recycle = ['trash_bags', 'shopping_bags', 'Styrofoam', 'ziplock']
+
     def __init__(self, data_dir, load_saved_model=False):
         batch_size = 32
         self.img_height = 180
@@ -77,6 +80,26 @@ class PlasticRecyclableClassifier(object):
         score = tf.nn.softmax(predictions[0])
         return self.class_names[np.argmax(score)], 100 * np.max(score)
 
+    def recyclable(self, filename):
+        class_name, score = self.predict(file_path)
+        if class_name in self.non_recycle:
+            return (class_name, score, False)
+        elif class_name in self.recycle:
+            return (class_name, score, True)
+        else:
+            return (class_name, score, None)
+
+def format_class_name(class_name):
+    return ' '.join(class_name.split('_')).title()
+
+def format_recyclable(recyclable):
+    if recyclable == True:
+        return 'recyclable'
+    elif recyclable == False:
+        return 'not recyclable'
+    elif recyclable == None:
+        return 'unknown whether it is recyclable'
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--load-saved-model', action='store_true', help='Load a saved model')
@@ -95,9 +118,6 @@ if __name__ == "__main__":
         if not os.path.exists(file_path):
             print('File does not exist')
             continue
-        class_name, score = classifier.predict(file_path)
 
-        print(
-            "This image most likely belongs to {} with a {:.2f} percent confidence."
-            .format(class_name, score)
-        )
+        class_name, score, recyclable = classifier.recyclable(file_path)
+        print('This item appears to be a %s with %.1f confidence, and is %s.' % (format_class_name(class_name), score, format_recyclable(recyclable)))
