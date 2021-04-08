@@ -4,10 +4,10 @@ import numpy as np
 import os
 import PIL
 import tensorflow as tf
-
 from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
+import argparse
 
 data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'plastics')
 batch_size = 32
@@ -60,29 +60,39 @@ model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
 
-epochs=10
-history = model.fit(
-  train_ds,
-  validation_data=val_ds,
-  epochs=epochs
-)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--load-saved-model', action='store_true', help='Load a saved model')
 
-while True:
-    filename = input('Specify an image to predict: ')
-    if not filename.strip():
-        break
-    file_path = os.path.realpath(os.path.expanduser(filename))
-    if not os.path.exists(file_path):
-        print('File does not exist')
-        continue
-    img = keras.preprocessing.image.load_img(file_path, target_size=(img_height, img_width))
-    img_array = keras.preprocessing.image.img_to_array(img)
-    img_array = tf.expand_dims(img_array, 0) # Create a batch
+    args = parser.parse_args()
 
-    predictions = model.predict(img_array)
-    score = tf.nn.softmax(predictions[0])
+    if os.path.exists('./final_weights.index') and args.load_saved_model:
+        model.load_weights('final_weights')
+    else:
+        epochs=10
+        history = model.fit(
+          train_ds,
+          validation_data=val_ds,
+          epochs=epochs
+        )
+        model.save_weights('final_weights')
 
-    print(
-        "This image most likely belongs to {} with a {:.2f} percent confidence."
-        .format(class_names[np.argmax(score)], 100 * np.max(score))
-    )
+    while True:
+        filename = input('Specify an image to predict: ')
+        if not filename.strip():
+            break
+        file_path = os.path.realpath(os.path.expanduser(filename))
+        if not os.path.exists(file_path):
+            print('File does not exist')
+            continue
+        img = keras.preprocessing.image.load_img(file_path, target_size=(img_height, img_width))
+        img_array = keras.preprocessing.image.img_to_array(img)
+        img_array = tf.expand_dims(img_array, 0) # Create a batch
+
+        predictions = model.predict(img_array)
+        score = tf.nn.softmax(predictions[0])
+
+        print(
+            "This image most likely belongs to {} with a {:.2f} percent confidence."
+            .format(class_names[np.argmax(score)], 100 * np.max(score))
+        )
