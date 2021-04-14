@@ -7,7 +7,27 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
+from tempfile import NamedTemporaryFile
 import argparse
+import cv2
+
+class Camera(object):
+    def __init__(self):
+        self.img_file = None
+
+    def capture(self):
+        if self.img_file:
+            os.unlink(self.img_file)
+        with NamedTemporaryFile(delete=False, suffix='.jpg') as f:
+            self.img_file = f.name
+        cam = cv2.VideoCapture(0)
+        ret, image = cam.read()
+        cv2.imwrite(self.img_file, image)
+        return self.img_file
+
+    def __del__(self):
+        if self.img_file:
+            os.unlink(self.img_file)
 
 class PlasticRecyclableClassifier(object):
     recycle = ['milk_carton', 'plastic_bottle', 'pill_bottle']
@@ -105,19 +125,27 @@ if __name__ == "__main__":
     parser.add_argument('--load-saved-model', action='store_true', help='Load a saved model')
     default_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'plastics')
     parser.add_argument('--data-dir', help='Location of the plastics data directory', default=default_data_dir)
+    parser.add_argument('--from-camera', help='Classify images from the camera instead of filenames', action='store_true')
 
     args = parser.parse_args()
 
     classifier = PlasticRecyclableClassifier(args.data_dir, args.load_saved_model)
+    if args.from_camera:
+        cam = Camera()
 
     while True:
-        filename = input('Specify an image to predict: ')
-        if not filename.strip():
-            break
-        file_path = os.path.realpath(os.path.expanduser(filename))
-        if not os.path.exists(file_path):
-            print('File does not exist')
-            continue
+        if args.from_camera:
+            with NamedTemporaryFile(delete=False) as f:
+                input('Press enter to capture an image from the webcam...')
+                file_path = cam.capture()
+        else:
+            filename = input('Specify an image to predict: ')
+            if not filename.strip():
+                break
+            file_path = os.path.realpath(os.path.expanduser(filename))
+            if not os.path.exists(file_path):
+                print('File does not exist')
+                continue
 
         class_name, score, recyclable = classifier.recyclable(file_path)
         print('This item appears to be a %s with %.1f confidence, and is %s.' % (format_class_name(class_name), score, format_recyclable(recyclable)))
