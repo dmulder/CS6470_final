@@ -8,7 +8,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-import PIL
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -103,16 +102,21 @@ class PlasticRecyclableClassifier(object):
         image_batch, labels_batch = next(iter(normalized_ds))
         first_image = image_batch[0]
 
+        activation = 'relu'
         self.model = Sequential([
           layers.experimental.preprocessing.Rescaling(1./255, input_shape=(self.img_height, self.img_width, 3)),
-          layers.Conv2D(16, 3, padding='same', activation='relu'),
+          layers.Conv2D(16, 3, padding='same', activation=activation),
           layers.MaxPooling2D(),
-          layers.Conv2D(32, 3, padding='same', activation='relu'),
+          layers.Conv2D(32, 3, padding='same', activation=activation),
           layers.MaxPooling2D(),
-          layers.Conv2D(64, 3, padding='same', activation='relu'),
+          layers.Conv2D(64, 3, padding='same', activation=activation),
+          layers.MaxPooling2D(),
+          layers.Conv2D(128, 3, padding='same', activation=activation),
+          layers.MaxPooling2D(),
+          layers.Conv2D(256, 3, padding='same', activation=activation),
           layers.MaxPooling2D(),
           layers.Flatten(),
-          layers.Dense(128, activation='relu'),
+          layers.Dense(128, activation=activation),
           layers.Dense(len(self.class_names))
         ])
 
@@ -123,7 +127,7 @@ class PlasticRecyclableClassifier(object):
         if os.path.exists('./final_weights.index') and load_saved_model:
             self.model.load_weights('final_weights')
         else:
-            epochs=10
+            epochs=30
             history = self.model.fit(
               train_ds,
               validation_data=val_ds,
