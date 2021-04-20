@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Final Project Source Code for Identifying Recyclable Plastic
+# CS-6470
+# Davis Mulder, Joseph Dobesh
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -11,6 +17,14 @@ from tempfile import NamedTemporaryFile
 import argparse
 import cv2
 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Class: Camera
+#
+# Description: This class takes a snapshot using the attached cameras and saves it to a file.
+#
+# Methods: capture - Takes the snapshot and saves the image to a file.
+#   Arguments: None
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 class Camera(object):
     def __init__(self):
         self.img_file = None
@@ -29,6 +43,14 @@ class Camera(object):
         if self.img_file:
             os.unlink(self.img_file)
 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Class: PlasticRecyclableClassifier
+#
+# This class does both the training and the classifting
+#
+# Methods: Constructor - Loads the cofiguration into the machine
+#   Arguments: data_dir - Path to the data directories
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 class PlasticRecyclableClassifier(object):
     recycle = ['milk_carton', 'plastic_bottle', 'pill_bottle']
     non_recycle = ['trash_bags', 'shopping_bags', 'Styrofoam', 'ziplock']
