@@ -17,6 +17,23 @@ from tempfile import NamedTemporaryFile
 import argparse
 import cv2
 
+def select_camera():
+    found = []
+    for i in range(1600):
+        cap = cv2.VideoCapture(i)
+        success, image = cap.read()
+        if success:
+            found.append(i)
+        cap.release()
+    return found
+
+def choose_camera():
+    found = select_camera()
+    print('Select a camera id:')
+    for i in found:
+        print('> %d' % i)
+    return input('[%d]: ' % found[0])
+
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Class: Camera
 #
@@ -26,15 +43,16 @@ import cv2
 #   Arguments: None
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 class Camera(object):
-    def __init__(self):
+    def __init__(self, cam_id=0):
         self.img_file = None
+        self.cam_id = cam_id
 
     def capture(self):
         if self.img_file:
             os.unlink(self.img_file)
         with NamedTemporaryFile(delete=False, suffix='.jpg') as f:
             self.img_file = f.name
-        cam = cv2.VideoCapture(0)
+        cam = cv2.VideoCapture(self.cam_id)
         ret, image = cam.read()
         cv2.imwrite(self.img_file, image)
         return self.img_file
@@ -148,12 +166,15 @@ if __name__ == "__main__":
     default_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'plastics')
     parser.add_argument('--data-dir', help='Location of the plastics data directory', default=default_data_dir)
     parser.add_argument('--from-camera', help='Classify images from the camera instead of filenames', action='store_true')
+    parser.add_argument('--camera-id', help='Specify the camera id to read images from')
 
     args = parser.parse_args()
 
     classifier = PlasticRecyclableClassifier(args.data_dir, args.load_saved_model)
     if args.from_camera:
-        cam = Camera()
+        if not args.camera_id:
+            args.camera_id = choose_camera()
+        cam = Camera(int(args.camera_id))
 
     while True:
         if args.from_camera:
