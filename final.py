@@ -16,6 +16,13 @@ from tempfile import NamedTemporaryFile
 import argparse
 import cv2
 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Helper Functions
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# select_camera - searches for a camera and adds it to a list
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 def select_camera():
     found = []
     for i in range(1600):
@@ -26,12 +33,36 @@ def select_camera():
         cap.release()
     return found
 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# choose_camera - Selects a camera from a list
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 def choose_camera():
     found = select_camera()
     print('Select a camera id:')
     for i in found:
         print('> %d' % i)
     return input('[%d]: ' % found[0])
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# format_class_name - Makes the class name readable
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+def format_class_name(class_name):
+    return ' '.join(class_name.split('_')).title()
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# format_recyclable - Converts the recyclable value to a readable string
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+def format_recyclable(recyclable):
+    if recyclable == True:
+        return 'recyclable'
+    elif recyclable == False:
+        return 'not recyclable'
+    elif recyclable == None:
+        return 'unknown whether it is recyclable'
+
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Classes
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Class: Camera
@@ -65,8 +96,18 @@ class Camera(object):
 #
 # This class does both the training and the classifting
 #
-# Methods: Constructor - Loads the cofiguration into the machine
-#   Arguments: data_dir - Path to the data directories
+# Method: Constructor - Loads the cofiguration into the machine
+#   Argument: data_dir - Path to the data directories
+#
+# Method: predict - Loads an image and predicts the clasification of the item
+#                   in the image.
+#   Argument: filename - the file path of the item image.
+#   Returns: Returns the predition of what the item is, and the percent of confidence.
+#
+# Method: recyclable - Calls predict and determines if the item is recyclable
+#                      from the data returned from predict.
+#   Argument: filename - the file path of the item image.
+#   Returns: Returns whether the item in recyclable, not recyclable or unknown.
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 class PlasticRecyclableClassifier(object):
     recycle = ['milk_carton', 'plastic_bottle', 'pill_bottle']
@@ -153,17 +194,14 @@ class PlasticRecyclableClassifier(object):
         else:
             return (class_name, score, None)
 
-def format_class_name(class_name):
-    return ' '.join(class_name.split('_')).title()
 
-def format_recyclable(recyclable):
-    if recyclable == True:
-        return 'recyclable'
-    elif recyclable == False:
-        return 'not recyclable'
-    elif recyclable == None:
-        return 'unknown whether it is recyclable'
-
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# main
+#
+# This is the main task that creates a user interface for selecting a camera,
+#   taking a snapshot of an an item, training the model, and predicting the 
+#   recyclability of the item.
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--load-saved-model', action='store_true', help='Load a saved model')
