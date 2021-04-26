@@ -117,14 +117,14 @@ class PlasticRecyclableClassifier(object):
         batch_size = 32
         self.img_height = 180
         self.img_width = 180
-        train_ds = tf.keras.preprocessing.image_dataset_from_directory(
+        self.train_ds = tf.keras.preprocessing.image_dataset_from_directory(
           data_dir,
           validation_split=0.2,
           subset="training",
           seed=123,
           image_size=(self.img_height, self.img_width),
           batch_size=batch_size)
-        val_ds = tf.keras.preprocessing.image_dataset_from_directory(
+        self.val_ds = tf.keras.preprocessing.image_dataset_from_directory(
           data_dir,
           validation_split=0.2,
           subset="validation",
@@ -132,14 +132,14 @@ class PlasticRecyclableClassifier(object):
           image_size=(self.img_height, self.img_width),
           batch_size=batch_size)
 
-        self.class_names = train_ds.class_names
+        self.class_names = self.train_ds.class_names
 
-        train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=tf.data.AUTOTUNE)
-        val_ds = val_ds.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
+        self.train_ds = self.train_ds.cache().shuffle(1000).prefetch(buffer_size=tf.data.AUTOTUNE)
+        self.val_ds = self.val_ds.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
 
         normalization_layer = layers.experimental.preprocessing.Rescaling(1./255)
 
-        normalized_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
+        normalized_ds = self.train_ds.map(lambda x, y: (normalization_layer(x), y))
         image_batch, labels_batch = next(iter(normalized_ds))
         first_image = image_batch[0]
 
@@ -164,13 +164,17 @@ class PlasticRecyclableClassifier(object):
 
         if os.path.exists('./final_weights.index') and load_saved_model:
             self.model.load_weights('final_weights')
-        else:
-            history = self.model.fit(
-              train_ds,
-              validation_data=val_ds,
-              epochs=epochs
-            )
-            self.model.save_weights('final_weights')
+
+    def fit(self):
+        history = self.model.fit(
+          self.train_ds,
+          validation_data=self.val_ds,
+          epochs=epochs
+        )
+        return history
+
+    def save(self):
+        self.model.save_weights('final_weights')
 
     def predict(self, filename):
         img = keras.preprocessing.image.load_img(file_path, target_size=(self.img_height, self.img_width))
@@ -209,6 +213,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     classifier = PlasticRecyclableClassifier(args.data_dir, args.load_saved_model)
+    if not args.load_saved_model:
+        classifier.fit()
+    classifier.save()
     if args.from_camera:
         if not args.camera_id:
             args.camera_id = choose_camera()
