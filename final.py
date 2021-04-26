@@ -113,7 +113,7 @@ class PlasticRecyclableClassifier(object):
     recycle = ['milk_carton', 'plastic_bottle', 'pill_bottle']
     non_recycle = ['trash_bags', 'shopping_bags', 'Styrofoam', 'ziplock']
 
-    def __init__(self, data_dir, load_saved_model=False):
+    def __init__(self, data_dir, load_saved_model=False, activation='relu', conv2d_layer_count=5):
         batch_size = 32
         self.img_height = 180
         self.img_width = 180
@@ -143,19 +143,16 @@ class PlasticRecyclableClassifier(object):
         image_batch, labels_batch = next(iter(normalized_ds))
         first_image = image_batch[0]
 
-        activation = 'relu'
+        step = 16
+        conv2d_layers = []
+        for _ in range(conv2d_layer_count):
+            conv2d_layers.append(layers.Conv2D(step, 3, padding='same', activation=activation))
+            step *= 2
+            conv2d_layers.append(layers.MaxPooling2D())
+
         self.model = Sequential([
           layers.experimental.preprocessing.Rescaling(1./255, input_shape=(self.img_height, self.img_width, 3)),
-          layers.Conv2D(16, 3, padding='same', activation=activation),
-          layers.MaxPooling2D(),
-          layers.Conv2D(32, 3, padding='same', activation=activation),
-          layers.MaxPooling2D(),
-          layers.Conv2D(64, 3, padding='same', activation=activation),
-          layers.MaxPooling2D(),
-          layers.Conv2D(128, 3, padding='same', activation=activation),
-          layers.MaxPooling2D(),
-          layers.Conv2D(256, 3, padding='same', activation=activation),
-          layers.MaxPooling2D(),
+          *conv2d_layers,
           layers.Flatten(),
           layers.Dense(128, activation=activation),
           layers.Dense(len(self.class_names))
