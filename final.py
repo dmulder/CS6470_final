@@ -113,7 +113,7 @@ class PlasticRecyclableClassifier(object):
     recycle = ['milk_carton', 'plastic_bottle', 'pill_bottle']
     non_recycle = ['trash_bags', 'shopping_bags', 'Styrofoam', 'ziplock']
 
-    def __init__(self, data_dir, load_saved_model=False, activation='relu', conv2d_layer_count=5):
+    def __init__(self, data_dir, load_saved_model=False, activation='relu', conv2d_layer_count=5, epochs=30):
         batch_size = 32
         self.img_height = 180
         self.img_width = 180
@@ -165,7 +165,6 @@ class PlasticRecyclableClassifier(object):
         if os.path.exists('./final_weights.index') and load_saved_model:
             self.model.load_weights('final_weights')
         else:
-            epochs=30
             history = self.model.fit(
               train_ds,
               validation_data=val_ds,
