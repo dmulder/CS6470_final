@@ -113,7 +113,7 @@ class PlasticRecyclableClassifier(object):
     recycle = ['milk_carton', 'plastic_bottle', 'pill_bottle']
     non_recycle = ['trash_bags', 'shopping_bags', 'Styrofoam', 'ziplock']
 
-    def __init__(self, data_dir, load_saved_model=False, activation='relu', conv2d_layer_count=5, epochs=30):
+    def __init__(self, data_dir, load_saved_model=False, activation='elu', conv2d_layer_count=5, epochs=30):
         self.epochs = epochs
         batch_size = 32
         self.img_height = 180
