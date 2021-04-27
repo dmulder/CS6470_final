@@ -114,6 +114,7 @@ class PlasticRecyclableClassifier(object):
     non_recycle = ['trash_bags', 'shopping_bags', 'Styrofoam', 'ziplock']
 
     def __init__(self, data_dir, load_saved_model=False, activation='relu', conv2d_layer_count=5, epochs=30):
+        self.epochs = epochs
         batch_size = 32
         self.img_height = 180
         self.img_width = 180
@@ -169,7 +170,7 @@ class PlasticRecyclableClassifier(object):
         history = self.model.fit(
           self.train_ds,
           validation_data=self.val_ds,
-          epochs=epochs
+          epochs=self.epochs
         )
         return history
 
