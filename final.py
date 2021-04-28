@@ -99,6 +99,11 @@ class Camera(object):
 # Method: Constructor - Loads the cofiguration into the machine
 #   Argument: data_dir - Path to the data directories
 #
+# Method: fit - Trains the model.
+#
+# Method: save - Saves the final weights for future use.
+#   Argument: final_weights - the weightrs to be stored.
+#
 # Method: predict - Loads an image and predicts the clasification of the item
 #                   in the image.
 #   Argument: filename - the file path of the item image.
@@ -200,8 +205,8 @@ class PlasticRecyclableClassifier(object):
 # main
 #
 # This is the main task that creates a user interface for selecting a camera,
-#   taking a snapshot of an an item, training the model, and predicting the 
-#   recyclability of the item.
+#   taking a snapshot of an an item, training the model, assigning a
+#   classification and predicting the recyclability of the item.
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
