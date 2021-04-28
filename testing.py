@@ -9,28 +9,31 @@ for activation in ['elu', 'exponential', 'gelu', 'hard_sigmoid', 'linear', 'relu
         output = c.fit()
         activation_outputs[activation] = output.history['accuracy']
         print(activation, 'accuracy', str(output.history['accuracy'][-1]))
+        del c
     except:
         pass
 print('activation_outputs =', activation_outputs)
 
 layer_outputs = {}
-for count in range(2, 16):
+for count in range(2, 8):
     try:
-        c = PlasticRecyclableClassifier('plastics', conv2d_layer_count=count)
+        c = PlasticRecyclableClassifier('plastics', activation='elu', conv2d_layer_count=count, epochs=30)
         output = c.fit()
         layer_outputs[count] = output.history['accuracy']
         print('%d layer accuracy' % count, str(output.history['accuracy'][-1]))
+        del c
     except:
         pass
 print('layer_outputs =', layer_outputs)
 
-epochs_outputs = {}
-for epochs in range(2, 50):
+layer_outputs = {}
+for count in range(2, 8):
     try:
-        c = PlasticRecyclableClassifier('plastics', epochs=epochs)
+        c = PlasticRecyclableClassifier('plastics', activation='swish', conv2d_layer_count=count, epochs=30)
         output = c.fit()
-        epochs_outputs[epochs] = output.history['accuracy']
-        print('%d epochs accuracy' % epochs, str(output.history['accuracy'][-1]))
+        layer_outputs[count] = output.history['accuracy']
+        print('%d layer accuracy' % count, str(output.history['accuracy'][-1]))
+        del c
     except:
         pass
-print('epochs_outputs =', epochs_outputs)
+print('swish_layer_outputs =', layer_outputs)
