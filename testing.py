@@ -37,3 +37,27 @@ for count in range(2, 8):
     except:
         pass
 print('swish_layer_outputs =', layer_outputs)
+
+layer_outputs = {}
+for count in range(2, 8):
+    try:
+        c = PlasticRecyclableClassifier('plastics', activation='linear', conv2d_layer_count=count, epochs=30)
+        output = c.fit()
+        layer_outputs[count] = output.history['accuracy']
+        print('%d layer accuracy' % count, str(output.history['accuracy'][-1]))
+        del c
+    except:
+        pass
+print('linear_layer_outputs =', layer_outputs)
+
+layer_outputs = {}
+for count in range(2, 8):
+    try:
+        c = PlasticRecyclableClassifier('plastics', activation='relu', conv2d_layer_count=count, epochs=30)
+        output = c.fit()
+        layer_outputs[count] = output.history['accuracy']
+        print('%d layer accuracy' % count, str(output.history['accuracy'][-1]))
+        del c
+    except:
+        pass
+print('relu_layer_outputs =', layer_outputs)

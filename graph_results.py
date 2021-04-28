@@ -38,4 +38,26 @@ fig2.update_layout(title='Comparison of Swish Layers for Identifying Recyclables
                    yaxis_title='Accuracy')
 fig2.show()
 
+fig3 = go.Figure()
+for layer in linear_layer_outputs.keys():
+    fig3.add_scatter(
+        name='%d Layers' % layer,
+        x=[i for i in range(1, len(linear_layer_outputs[layer])+1)],
+        y=linear_layer_outputs[layer],
+    )
+fig3.update_layout(title='Comparison of Linear Layers for Identifying Recyclables',
+                   xaxis_title='Epochs',
+                   yaxis_title='Accuracy')
+fig3.show()
 
+fig4 = go.Figure()
+for layer in relu_layer_outputs.keys():
+    fig4.add_scatter(
+        name='%d Layers' % layer,
+        x=[i for i in range(1, len(relu_layer_outputs[layer])+1)],
+        y=relu_layer_outputs[layer],
+    )
+fig4.update_layout(title='Comparison of relu Layers for Identifying Recyclables',
+                   xaxis_title='Epochs',
+                   yaxis_title='Accuracy')
+fig4.show()
