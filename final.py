@@ -15,6 +15,7 @@ from tensorflow.keras.models import Sequential
 from tempfile import NamedTemporaryFile
 import argparse
 import cv2
+from shutil import copyfile
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Helper Functions
@@ -229,9 +230,13 @@ if __name__ == "__main__":
 
     while True:
         if args.from_camera:
-            with NamedTemporaryFile(delete=False) as f:
+            if not os.path.exists('./testing'):
+                os.mkdir('./testing')
+            with NamedTemporaryFile(suffix='.jpg', delete=False, dir='./testing') as f:
                 input('Press enter to capture an image from the webcam...')
                 file_path = cam.capture()
+                copyfile(file_path, f.name)
+                file_path = f.name
         else:
             filename = input('Specify an image to predict: ')
             if not filename.strip():
